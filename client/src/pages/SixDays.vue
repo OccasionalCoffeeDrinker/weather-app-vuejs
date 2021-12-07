@@ -6,11 +6,13 @@
       </q-avatar>
       <span>Home</span>
       </q-btn>
+      <!-- here we get date -->
       <div class="date">
         {{dateBuilder()}}
       </div>
 
       <div>
+        <!-- we use for loop here to get data for weather, day, icons and max and min temp -->
             <div style="padding: 20px; box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px; border-radius: 7px;" v-if="getDone">
                 <div style="margin-bottom: 10px" class="row box" v-for="i in allWeaatherData.consolidated_weather.length" :key="i">
                     <div class="col">
@@ -21,12 +23,17 @@
                             <img :src="imagesSrc[i-1]">
                         </q-avatar>
                     </div>
-                    <div  style="text-align: right" class="col">
+                    <div  style="text-align: right" class="col"> 
                         {{Math.round(allWeaatherData.consolidated_weather[i-1].max_temp)}} / {{Math.round(allWeaatherData.consolidated_weather[i-1].min_temp)}}
                     </div>
                 </div>
             </div>
         </div>
+      <div class="btn">
+        <!-- 2 buttons, one for text size and other for reading text if someone is having hard time to use app -->
+        <q-btn id="btn1" @click="toggleSize()" unelevated rounded color="primary" :label="this.btnName" />
+        <q-btn id="btn2" @click="read()" unelevated rounded color="primary" label="Read text" />
+      </div>
 
 
     
@@ -74,7 +81,9 @@ export default({
       errorStr:null,
       allWeaatherData: {title: '', parent: {title: ''},consolidated_weather: [{the_temp: '', visibility: '', wind_speed: '', humidity: '', max_temp: '', min_temp: ''}]},
       imageSrc: "https://cdn.quasar.dev/img/avatar.png",
-      imagesSrc: []
+      imagesSrc: [],
+      btnName : "200% text",
+      textForReading: "",
 
     };
   },
@@ -98,6 +107,35 @@ export default({
       })
   },
   methods: {
+    //we get data from api and use this to read msg we prepered in getWeatherData function bellow
+    read(){
+      var msg = new SpeechSynthesisUtterance();
+      msg.text = this.textForReading;
+      window.speechSynthesis.speak(msg);
+    },
+    // this function change size of text and label on button
+    toggleSize(){
+      if (this.btnName === "200% text"){
+        this.btnName = "100% text"
+        document.getElementById("btn1").style.fontSize = "40px";
+        document.getElementById("btn2").style.fontSize = "40px";
+        document.getElementsByClassName("date")[0].style.fontSize = "30px";
+        var elements = document.getElementsByClassName("col");
+          for (var i = 0, len = elements.length; i < len; i++) {
+            elements[i].style.fontSize = "40px";
+        }
+      }else{
+        this.btnName = "200% text"
+        document.getElementById("btn1").style.fontSize = "20px";
+        document.getElementById("btn2").style.fontSize = "20px";
+        document.getElementsByClassName("date")[0].style.fontSize = "15px";
+        var elements = document.getElementsByClassName("col");
+          for (var i = 0, len = elements.length; i < len; i++) {
+            elements[i].style.fontSize = "20px";
+        }
+      }
+    },
+    //we are getting date in this function
     dateBuilder(){
       let d = new Date();
       let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -113,10 +151,11 @@ export default({
     getDay(a){
         let d = new Date();
         let days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-        let day = days[d.getDay() + a];
+        let day = days[(d.getDay() + a)%7];
         return day;
 
     },
+    //we get lat and lon and then we can get woeid that we need to get info
     getWoeData() {       
         let linkStr = `http://localhost:8080/https://www.metaweather.com/api/location/search/?lattlong=${this.location.coords.latitude},${this.location.coords.longitude}`
         debugger;
@@ -155,6 +194,12 @@ export default({
             console.log("Odgovor drugi")
             console.log(response.data);
             self.allWeaatherData = response.data;
+            self.textForReading = "Today is "+ self.dateBuilder() +". This is weather for next 6 days. "+ self.getDay(0)+"Max temperature is"+ Math.round(self.allWeaatherData.consolidated_weather[0].max_temp) + "degrees, min temperature is"+Math.round(self.allWeaatherData.consolidated_weather[0].min_temp) +"degrees"
+                                  + self.getDay(1)+", Max temperature is "+ Math.round(self.allWeaatherData.consolidated_weather[1].max_temp) + " degrees, min temperature is "+Math.round(self.allWeaatherData.consolidated_weather[1].min_temp) +" degrees"
+                                  + self.getDay(2)+", Max temperature is "+ Math.round(self.allWeaatherData.consolidated_weather[2].max_temp) + " degrees, min temperature is "+Math.round(self.allWeaatherData.consolidated_weather[2].min_temp) +" degrees"
+                                  + self.getDay(3)+", Max temperature is "+ Math.round(self.allWeaatherData.consolidated_weather[3].max_temp) + " degrees, min temperature is "+Math.round(self.allWeaatherData.consolidated_weather[3].min_temp) +" degrees"
+                                  + self.getDay(4)+", Max temperature is "+ Math.round(self.allWeaatherData.consolidated_weather[4].max_temp) + " degrees, min temperature is "+Math.round(self.allWeaatherData.consolidated_weather[4].min_temp) +" degrees"
+                                  + self.getDay(5)+", Max temperature is "+ Math.round(self.allWeaatherData.consolidated_weather[5].max_temp) + " degrees, min temperature is "+Math.round(self.allWeaatherData.consolidated_weather[5].min_temp) +" degrees"
             self.imagesSrc = [];
             self.allWeaatherData.consolidated_weather.forEach(entry => {
                 // self.imagesSrc.push(entry.weather_state_abbr)
@@ -317,6 +362,27 @@ sup {
 }
 .box{
     padding: 10px;
+}
+.btn{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #2B446B;
+}
+
+#btn1 {
+  padding: 15px;
+  margin: 15px;
+  width: 40%;
+  font-size: 20px;
+  
+}
+#btn2 {
+  padding: 15px;
+  margin: 15px;
+  width: 40%;
+  font-size: 20px;
+  
 }
 
 </style>
