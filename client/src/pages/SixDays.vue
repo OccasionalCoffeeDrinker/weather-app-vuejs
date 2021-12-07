@@ -19,9 +19,10 @@
                         {{getDay(i-1)}}
                     </div>
                     <div style="text-align: center" class="col">
-                        <q-avatar size="24px" rounded>
+                        <q-avatar size="24px" style="" rounded>
                             <img :src="imagesSrc[i-1]">
                         </q-avatar>
+                        <span id="hum"  v-if="imagesSrc[i-1] == cloudSleet || imagesSrc[i-1] == cloudSnow || imagesSrc[i-1] == cloudDrizzle || imagesSrc[i-1] == cloudRainHeavy || imagesSrc[i-1]== cloudHail">  {{allWeaatherData.consolidated_weather[i-1].humidity}} %</span>
                     </div>
                     <div  style="text-align: right" class="col"> 
                         {{Math.round(allWeaatherData.consolidated_weather[i-1].max_temp)}} / {{Math.round(allWeaatherData.consolidated_weather[i-1].min_temp)}}
@@ -383,6 +384,10 @@ sup {
   width: 40%;
   font-size: 20px;
   
+}
+#hum {
+  position: absolute;
+  padding-left: 15px;
 }
 
 </style>
